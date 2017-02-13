@@ -97,7 +97,7 @@ X = np.array([[0,0,0,0,0], # A matrix with rows as samples and columns as variab
 
 layer1 = ce.Corex(n_hidden=2, marginal_description='discrete', smooth_marginals=False)  
 # Define the number of hidden factors to use.
-# marginal_description can be 'discrete' or 'continuous' depending on your data
+# marginal_description can be 'discrete' or 'gaussian' if your data is continuous
 # smooth_marginals = True turns on Bayesian smoothing
 layer1.fit(X)  # Fit on data. 
 
