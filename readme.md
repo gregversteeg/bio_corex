@@ -184,6 +184,20 @@ Also, note that you can color nodes in the graphs by putting prepending a color 
 For instance, blue_column_1_label_name will show column_1_label_name in blue in the graphs folder. Any matplotlib colors are allowed. 
 See the BIG5 data file and graphs produced by the command line utility. 
 
+
+### Other files that are produced
+*text_files/groups.txt*
+Lists the variables in each group.
+
+*text_files/labels.txt*
+Gives a column for each latent factor (in layer 1) and a row for each patient/sample. The entry is the value of the latent factor (0,…dim_hidden-1)
+
+*text_files/cont_labels.txt*
+Gives a continuous number to sort each patient with respect to each latent factor. 
+
+*relationships*
+For each latent factor, it shows pairwise plots between the top genes in each group. Each point corresponds to a sample/patient and the color corresponds to the learned latent factor. 
+
 ### All options
 When you run vis_corex.py with the -h option, you get all the command line options. 
 ```
