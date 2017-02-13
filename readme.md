@@ -7,22 +7,19 @@ in several biomedical problems: missing data, continuous variables, and severely
 
 A preliminary version of the technique is described in this paper.      
 [*Discovering Structure in High-Dimensional Data Through Correlation Explanation*](http://arxiv.org/abs/1406.1222), 
-NIPS 2014.
-
+NIPS 2014.     
 This version uses theoretical developments described here:      
 [*Maximally Informative Hierarchical Representions of High-Dimensional Data*](http://arxiv.org/abs/1410.7404), 
-AISTATS 2015.  
-
+AISTATS 2015.       
 Finally, the Bayesian approach implemented here resulted form work with Shirley Pepke and is described here:     
 [*Comprehensive discovery of subsample gene expression components by information explanation: therapeutic implications in cancer*](http://biorxiv.org/content/early/2016/09/19/043257), 
-in BMC Medical Genomics (accepted). 
-
-You can also see applications of this code to neuroscience data.
+in BMC Medical Genomics (accepted).     
+You can also see applications of this code to neuroscience data
 [*here*](http://proceedings.spiedigitallibrary.org/proceeding.aspx?articleid=2600367), 
 [*here*](https://www.researchgate.net/profile/Madelaine_Daianu2/publication/299377637_Relative_Value_of_Diverse_Brain_MRI_and_Blood-Based_Biomarkers_for_Predicting_Cognitive_Decline_in_the_Elderly/links/56f2b0bd08aea5a8982ff958.pdf), 
 and [*here.*](https://www.researchgate.net/profile/Madelaine_Daianu2/publication/305726530_Information-Theoretic_Clustering_of_Neuroimaging_Metrics_Related_to_Cognitive_Decline_in_the_Elderly/links/57a8ab9d08aed76703f87777.pdf)
 
-For sparse binary data, try [*CorEx topic*](http://github.com/gregversteeg/corex_topic/). We are working
+For sparse binary data, try [*CorEx topic*](http://github.com/gregversteeg/corex_topic/). We are also working
 on a linear version of CorEx that is dramatically faster. Contact me if you'd like to try that out. 
 
 ###Dependencies
