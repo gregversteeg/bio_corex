@@ -84,6 +84,9 @@ the point color corresponds to p(yj|x) for that point.
 
 ### Example
 
+The API design is based on the scikit-learn package. You define a model (model=Corex(with options here)) then use
+ the model.fit(data) method to fit it on data, then you can transform new data with model.transform(new_data). 
+ The model has many other methods to access mutual information, measures of TC, and more. 
 ```python
 import corex as ce
 
@@ -92,8 +95,11 @@ X = np.array([[0,0,0,0,0], # A matrix with rows as samples and columns as variab
               [1,1,1,0,0],
               [1,1,1,1,1]], dtype=int)
 
-layer1 = ce.Corex(n_hidden=2, marginal_description='discrete', marginal_smoothing=False)  # Define the number of hidden factors to use.
-layer1.fit(X)
+layer1 = ce.Corex(n_hidden=2, marginal_description='discrete', smooth_marginals=False)  
+# Define the number of hidden factors to use.
+# marginal_description can be 'discrete' or 'continuous' depending on your data
+# smooth_marginals = True turns on Bayesian smoothing
+layer1.fit(X)  # Fit on data. 
 
 layer1.clusters  # Each variable/column is associated with one Y_j
 # array([0, 0, 0, 1, 1])
