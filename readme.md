@@ -122,8 +122,8 @@ For the discrete version of CorEx, you must input a matrix of integers whose row
 represent different variables. The values must be integers {0,1,...,k-1} where k represents the maximum number of 
 values that each variable, x_i can take. By default, entries equal to -1 are treated as missing. This can be 
 altered by passing a *missing_values* argument when initializing CorEx. 
-"marginal_smoothing" tells whether to use Bayesian shrinkage estimators for marginal distributions to reduce noise.
-It is turned on by default but is off in the example above (since it only has 4 samples, the smoothing will mess it up). 
+"smooth_marginals" tells whether to use Bayesian shrinkage estimators for marginal distributions to reduce noise.
+It is turned on by default but is off in the example above (since it only has 4 samples, the smoothing will mess it up).
 
 ### CorEx outputs
 
