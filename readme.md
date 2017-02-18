@@ -51,12 +51,14 @@ These examples use data included in the tests folder. `python vis_corex.py -h` g
 In this simple example there are five variables, v1...v5 where v1, v2, v3 are in one cluster and v4, v5 are in another. 
 Looking in "corex_output/graphs" you should see pdf files with the graphs (with graphviz). 
 
-`python vis_corex.py data/test_big5.csv --layers=5,1 -v --no_row_names -o big5`
+`python vis_corex.py data/test_big5.csv --layers=5,1 --missing=-1 -v --no_row_names -o big5`
 
 This reads the CSV file containing some Big-5 personality survey data. It uses 5 hidden units (and associated clusters)
  at the first layer, and 1 at the second layer. 
  Option -v gives verbose outputs. By default, it is assumed that the first column and row are labels, 
-this expectation can be changed with options. Finally, all the output files are placed in the directory "big5". 
+this expectation can be changed with options. There are a few missing values specified with -1. Note that for discrete
+data, the discrete values each variable takes have to be like 0,1,...
+Finally, all the output files are placed in the directory "big5". 
 
 Looking in the directory "big5/graphs", you should see a pdf that shows the questions clustered into five groups. See
 the [full raw data](http://personality-testing.info/_rawdata/BIG5.zip) for information on questions. "Text_files" 
