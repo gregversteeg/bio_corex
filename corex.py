@@ -2,7 +2,7 @@
 
 Greg Ver Steeg and Aram Galstyan. "Maximally Informative
 Hierarchical Representations of High-Dimensional Data"
-AISTATS, 2015. arXiv preprint arXiv:1410.7404.
+AISTATS, 2015. arXiv preprint(arXiv:1410.7404.)
 
 Code below written by:
 Greg Ver Steeg (gregv@isi.edu), 2015.
@@ -10,6 +10,8 @@ Greg Ver Steeg (gregv@isi.edu), 2015.
 License: Apache V2 (This development version not yet released)
 """
 
+from __future__ import print_function
+import sys
 import numpy as np  # Tested with 1.8.0
 from os import makedirs
 from os import path
@@ -93,11 +95,11 @@ class Corex(object):
 
     [1]     Greg Ver Steeg and Aram Galstyan. "Discovering Structure in
             High-Dimensional Data Through Correlation Explanation."
-            NIPS, 2014. arXiv preprint arXiv:1406.1222.
+            NIPS, 2014. arXiv preprint(arXiv:1406.1222.)
 
     [2]     Greg Ver Steeg and Aram Galstyan. "Maximally Informative
             Hierarchical Representations of High-Dimensional Data"
-            AISTATS, 2015. arXiv preprint arXiv:1410.7404.
+            AISTATS, 2015. arXiv preprint(arXiv:1410.7404.)
 
     """
     def __init__(self, n_hidden=2, dim_hidden=2,            # Size of representations
@@ -123,7 +125,7 @@ class Corex(object):
         self.verbose = verbose
         if verbose > 0:
             np.set_printoptions(precision=3, suppress=True, linewidth=200)
-            print 'corex, rep size:', n_hidden, dim_hidden
+            print('corex, rep size:', n_hidden, dim_hidden)
         if verbose:
             np.seterr(all='ignore')
             # Can change to 'raise' if you are worried to see where the errors are
@@ -133,7 +135,7 @@ class Corex(object):
         self.tc_min = 0.01  # Try to "boost" hidden units with less than tc_min. Haven't tested value much.
         self.marginal_description = marginal_description
         if verbose:
-            print "Marginal description: ", marginal_description
+            print("Marginal description: ", marginal_description)
 
     def label(self, p_y_given_x):
         """Maximum likelihood labels for some distribution over y's"""
@@ -203,13 +205,13 @@ class Corex(object):
                     break
 
             if self.verbose:
-                print 'Overall tc:', self.tc
+                print('Overall tc:', self.tc)
             if self.tc > best_tc:
                 best_tc = self.tc
                 best_dict = self.__dict__.copy()  # TODO: what happens if n_cpu > 1 and n_repeat > 1? Does pool get copied? Probably not...just a pointer to the same object... Seems fine.
         self.__dict__ = best_dict
         if self.verbose:
-            print 'Best tc:', self.tc
+            print('Best tc:', self.tc)
 
         self.sort_and_output(Xm)
         if self.pool is not None:
@@ -256,7 +258,7 @@ class Corex(object):
             values_in_data = set(np.unique(X).tolist())-set([self.missing_values])
             self.dim_visible = int(max(values_in_data)) + 1
             if not set(range(self.dim_visible)) == values_in_data:
-                print "Warning: Data matrix values should be consecutive integers starting with 0,1,..."
+                print("Warning: Data matrix values should be consecutive integers starting with 0,1,...")
             assert max(values_in_data) <= 32, "Due to a limitation in np.choice, discrete valued variables" \
                                               "can take values from 0 to 31 only."
         self.initialize_representation()
@@ -402,12 +404,12 @@ class Corex(object):
 
     def print_verbose(self):
         if self.verbose:
-            print self.tcs
+            print(self.tcs)
         if self.verbose > 1:
-            print self.alpha[:, :, 0]
-            print self.theta
+            print(self.alpha[:, :, 0])
+            print(self.theta)
             if hasattr(self, "mis"):
-                print self.mis
+                print(self.mis)
 
     def convergence(self):
         if len(self.tc_history) > 10:
@@ -492,7 +494,7 @@ class Corex(object):
             return np.choose(xi.reshape((-1, 1, 1)), logp).transpose((1, 0, 2))
 
         else:
-            print 'Marginal description "%s" not implemented.' % self.marginal_description
+            print('Marginal description "%s" not implemented.' % self.marginal_description)
             sys.exit()
 
     def estimate_parameters(self, xi, p_y_given_x):
@@ -536,7 +538,7 @@ class Corex(object):
             return np.log(p)
 
         else:
-            print 'Marginal description "%s" not implemented.' % self.marginal_description
+            print('Marginal description "%s" not implemented.' % self.marginal_description)
             sys.exit()
 
     def estimate_se(self, xi, p_y_given_x, n_obs):
