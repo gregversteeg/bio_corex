@@ -181,17 +181,21 @@ of samples is small (less than 200) or the number of variables or dim_hidden are
 Also note that CorEx can find different local optima after different random restarts. You can run it k times and take
 the best solution with the "repeat" option. 
 
-### Better visualizations
-If you install the gts library and THEN install graphviz, graphviz should be capable of better visualizations (by using
-gts to render nicer curved lines). 
+
+
+### Troubleshooting visualization
+To get the visualization of the hierarchy looking nice sometimes takes a little effort. To get graphs to compile correctly do the following. 
+Using "brew" to install, you need to do "brew install gts" followed by "brew install --with-gts graphviz". 
+The (hacky) way that the visualizations are produced is the following. The code, vis_corex.py, produces a text file called "graphs/graph.dot". This just encodes the edges between nodes in dot format. Then, the code calls a command line utility called sfdp that is part of graphviz, 
 ```
 sfdp tree.dot -Tpdf -Earrowhead=none -Nfontsize=12  -GK=2 -Gmaxiter=1000 -Goverlap=False -Gpack=True -Gpackmode=clust -Gsep=0.02 -Gratio=0.7 -Gsplines=True -o nice.pdf
 ```
+These dot files can also be opened with OmniGraffle if you would like to be able to manipulate them by hand. 
+If you want, you can try to recompile graphs yourself with different options to make them look nicer. Or you can edit the dot files to get effects like colored nodes, etc. 
 
 Also, note that you can color nodes in the graphs by putting prepending a color to column label names in the CSV file.
 For instance, blue_column_1_label_name will show column_1_label_name in blue in the graphs folder. Any matplotlib colors are allowed. 
 See the BIG5 data file and graphs produced by the command line utility. 
-
 
 ### Other files that are produced
 *text_files/groups.txt*
