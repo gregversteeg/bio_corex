@@ -31,6 +31,7 @@ def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_o
         data_to_plot = np.where(data == corex.missing_values, np.nan, data)
         cont = cont3(corex.p_y_given_x)
         plot_top_relationships(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix)
+        plot_heatmaps(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix)
         # plot_top_relationships(data_to_plot, corex.labels, alpha, mis, column_label, corex.log_z[:,:,0].T, prefix=prefix+'anomaly_')
     plot_convergence(corex.tc_history, prefix=prefix)
 
@@ -47,6 +48,15 @@ def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, pre
         f.write('At layer: %d, Total TC: %0.3f\n' % (j, corex.tc))
         f.write('Individual TCS:' + str(corex.tcs) + '\n')
         plot_convergence(corex.tc_history, prefix=prefix, prefix2=j)
+        g = safe_open('{}/text_files/mis_layer{}.csv'.format(prefix, j), 'w+')
+        if j == 0:
+            g.write('factor,' + ','.join(column_label) + '\n')
+        else:
+            g.write('factor,'+ ','.join(map(str, list(range(len(corex.mis[0,:]))))) + '\n')
+        mis = corex.mis / np.log(2)
+        for ir, r in enumerate(mis):
+            g.write(str(ir) + ',' + ','.join(map(str, r)) + '\n')
+        g.close()
     f.close()
 
     import textwrap
@@ -67,6 +77,32 @@ def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, pre
     edge2pdf(tree, prefix + '/graphs/tree', labels='label', directed=True, makepdf=True)
 
     return g
+
+
+def plot_heatmaps(data, labels, alpha, mis, column_label, cont, topk=20, athresh=0.2, prefix=''):
+    import seaborn as sns
+    cmap = sns.cubehelix_palette(as_cmap=True, light=.9)
+    import matplotlib.pyplot as plt
+    m, nv = mis.shape
+    for j in range(m):
+        inds = np.where(np.logical_and(alpha[j] > athresh, mis[j] > 0.))[0]
+        inds = inds[np.argsort(- alpha[j, inds] * mis[j, inds])][:topk]
+        if len(inds) >= 2:
+            plt.clf()
+            order = np.argsort(cont[:,j])
+            subdata = data[:, inds][order].T
+            subdata -= np.nanmean(subdata, axis=1, keepdims=True)
+            subdata /= np.nanstd(subdata, axis=1, keepdims=True)
+            columns = [column_label[i] for i in inds]
+            sns.heatmap(subdata, vmin=-3, vmax=3, cmap=cmap, yticklabels=columns, xticklabels=False, mask=np.isnan(subdata))
+            filename = '{}/heatmaps/group_num={}.png'.format(prefix, j)
+            if not os.path.exists(os.path.dirname(filename)):
+                os.makedirs(os.path.dirname(filename))
+            plt.title("Latent factor {}".format(j))
+            plt.savefig(filename, bbox_inches='tight')
+            plt.clf()
+            #plot_rels(data[:, inds], map(lambda q: column_label[q], inds), colors=cont[:, j],
+            #          outfile=prefix + '/relationships/group_num=' + str(j), latent=labels[:, j], alpha=0.1)
 
 
 def make_graph(weights, node_weights, column_label, max_edges=100):
