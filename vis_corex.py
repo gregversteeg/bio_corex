@@ -8,9 +8,12 @@ import matplotlib
 matplotlib.use('Agg')
 import pylab
 import networkx as nx
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
 
 
-def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_output'):
+def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_output', focus='', topk=5):
     """Various visualizations and summary statistics for a one layer representation"""
     if column_label is None:
         column_label = map(str, range(data.shape[1]))
@@ -30,8 +33,9 @@ def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_o
         print 'Pairwise plots among high TC variables in "relationships"'
         data_to_plot = np.where(data == corex.missing_values, np.nan, data)
         cont = cont3(corex.p_y_given_x)
-        plot_top_relationships(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix)
-        plot_heatmaps(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix)
+        plot_heatmaps(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix, focus=focus)
+        plot_pairplots(data_to_plot, corex.labels, alpha, corex.mis, column_label, prefix=prefix, focus=focus, topk=topk)
+        plot_top_relationships(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix, topk=topk)
         # plot_top_relationships(data_to_plot, corex.labels, alpha, mis, column_label, corex.log_z[:,:,0].T, prefix=prefix+'anomaly_')
     plot_convergence(corex.tc_history, prefix=prefix)
 
@@ -79,14 +83,16 @@ def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, pre
     return g
 
 
-def plot_heatmaps(data, labels, alpha, mis, column_label, cont, topk=20, athresh=0.2, prefix=''):
-    import seaborn as sns
+def plot_heatmaps(data, labels, alpha, mis, column_label, cont, topk=20, prefix='', focus=''):
     cmap = sns.cubehelix_palette(as_cmap=True, light=.9)
-    import matplotlib.pyplot as plt
     m, nv = mis.shape
     for j in range(m):
-        inds = np.where(np.logical_and(alpha[j] > athresh, mis[j] > 0.))[0]
+        inds = np.where(np.logical_and(alpha[j] > 0, mis[j] > 0.))[0]
         inds = inds[np.argsort(- alpha[j, inds] * mis[j, inds])][:topk]
+        if focus in column_label:
+            ifocus = column_label.index(focus)
+            if not ifocus in inds:
+                inds = np.insert(inds, 0, ifocus)
         if len(inds) >= 2:
             plt.clf()
             order = np.argsort(cont[:,j])
@@ -100,9 +106,47 @@ def plot_heatmaps(data, labels, alpha, mis, column_label, cont, topk=20, athresh
                 os.makedirs(os.path.dirname(filename))
             plt.title("Latent factor {}".format(j))
             plt.savefig(filename, bbox_inches='tight')
-            plt.clf()
+            plt.close('all')
             #plot_rels(data[:, inds], map(lambda q: column_label[q], inds), colors=cont[:, j],
             #          outfile=prefix + '/relationships/group_num=' + str(j), latent=labels[:, j], alpha=0.1)
+
+def plot_pairplots(data, labels, alpha, mis, column_label, topk=5, prefix='', focus=''):
+    cmap = sns.cubehelix_palette(as_cmap=True, light=.9)
+    plt.rcParams.update({'font.size': 32})
+    m, nv = mis.shape
+    for j in range(m):
+        inds = np.where(np.logical_and(alpha[j] > 0, mis[j] > 0.))[0]
+        inds = inds[np.argsort(- alpha[j, inds] * mis[j, inds])][:topk]
+        if focus in column_label:
+            ifocus = column_label.index(focus)
+            if not ifocus in inds:
+                inds = np.insert(inds, 0, ifocus)
+        if len(inds) >= 2:
+            plt.clf()
+            subdata = data[:, inds]
+            columns = [column_label[i] for i in inds]
+            subdata = pd.DataFrame(data=subdata, columns=columns)
+
+            sns.pairplot(subdata, kind="reg", diag_kind="kde", size=5)
+            filename = '{}/pairplots_regress/group_num={}.pdf'.format(prefix, j)
+            if not os.path.exists(os.path.dirname(filename)):
+                os.makedirs(os.path.dirname(filename))
+            plt.suptitle("Latent factor {}".format(j), y=1.01)
+            plt.savefig(filename, bbox_inches='tight')
+            plt.clf()
+
+            subdata['Latent factor'] = labels[:,j]
+            try:
+                sns.pairplot(subdata, kind="scatter", vars=subdata.columns.drop('Latent factor'), hue="Latent factor", diag_kind="kde", size=5)
+                filename = '{}/pairplots/group_num={}.pdf'.format(prefix, j)
+                if not os.path.exists(os.path.dirname(filename)):
+                    os.makedirs(os.path.dirname(filename))
+                plt.suptitle("Latent factor {}".format(j), y=1.01)
+                plt.savefig(filename, bbox_inches='tight')
+                plt.close('all')
+            except:
+                pass
+
 
 
 def make_graph(weights, node_weights, column_label, max_edges=100):
@@ -580,6 +624,12 @@ if __name__ == '__main__':
     group.add_option("-q", "--regraph",
                      action="store_true", dest="regraph", default=False,
                      help="Don't re-run corex, just re-generate outputs (perhaps with edges option changed).")
+    group.add_option("-F", "--focus",
+                     action="store", dest="focus", type="string", default="",
+                     help="A special variable to focus on in plots.")
+    group.add_option("-T", "--topk",
+                     action="store", dest="topk", type=int, default=5,
+                     help="How many variables to look at in pairplots.")
     parser.add_option_group(group)
 
     group = OptionGroup(parser, "Computational Options")
@@ -680,7 +730,7 @@ if __name__ == '__main__':
         corexes = [ce.Corex().load(options.output + '/layer_' + str(l) + '.dat') for l in range(len(layers))]
 
     # This line outputs plots showing relationships at the first layer
-    vis_rep(corexes[0], X, row_label=sample_names, column_label=variable_names, prefix=options.output)
+    vis_rep(corexes[0], X, row_label=sample_names, column_label=variable_names, prefix=options.output, focus=options.focus, topk=options.topk)
     # This line outputs a hierarchical networks structure in a .dot file in the "graphs" folder
     # And it tries to compile the dot file into a pdf using the command line utility sfdp (part of graphviz)
     vis_hierarchy(corexes, row_label=sample_names, column_label=variable_names, max_edges=options.max_edges,
