@@ -127,13 +127,16 @@ def plot_pairplots(data, labels, alpha, mis, column_label, topk=5, prefix='', fo
             columns = [column_label[i] for i in inds]
             subdata = pd.DataFrame(data=subdata, columns=columns)
 
-            sns.pairplot(subdata, kind="reg", diag_kind="kde", size=5)
-            filename = '{}/pairplots_regress/group_num={}.pdf'.format(prefix, j)
-            if not os.path.exists(os.path.dirname(filename)):
-                os.makedirs(os.path.dirname(filename))
-            plt.suptitle("Latent factor {}".format(j), y=1.01)
-            plt.savefig(filename, bbox_inches='tight')
-            plt.clf()
+            try:
+                sns.pairplot(subdata, kind="reg", diag_kind="kde", size=5)
+                filename = '{}/pairplots_regress/group_num={}.pdf'.format(prefix, j)
+                if not os.path.exists(os.path.dirname(filename)):
+                    os.makedirs(os.path.dirname(filename))
+                plt.suptitle("Latent factor {}".format(j), y=1.01)
+                plt.savefig(filename, bbox_inches='tight')
+                plt.clf()
+            except:
+                pass
 
             subdata['Latent factor'] = labels[:,j]
             try:
