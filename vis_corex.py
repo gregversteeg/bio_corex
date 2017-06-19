@@ -53,14 +53,20 @@ def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, pre
         f.write('Individual TCS:' + str(corex.tcs) + '\n')
         plot_convergence(corex.tc_history, prefix=prefix, prefix2=j)
         g = safe_open('{}/text_files/mis_layer{}.csv'.format(prefix, j), 'w+')
+        h = safe_open('{}/text_files/weights_layer{}.csv'.format(prefix, j), 'w+')
         if j == 0:
             g.write('factor,' + ','.join(column_label) + '\n')
+            h.write('factor,' + ','.join(column_label) + '\n')
         else:
             g.write('factor,'+ ','.join(map(str, list(range(len(corex.mis[0,:]))))) + '\n')
+            h.write('factor,'+ ','.join(map(str, list(range(len(corex.mis[0,:]))))) + '\n')
         mis = corex.mis / np.log(2)
+        alpha = corex.alpha
         for ir, r in enumerate(mis):
-            g.write(str(ir) + ',' + ','.join(map(str, r)) + '\n')
+            g.write(str(ir) + ',' + ','.join(map(str, mis[ir])) + '\n')
+            h.write(str(ir) + ',' + ','.join(map(str, mis[ir] * alpha[ir].ravel())) + '\n')
         g.close()
+        h.close()
     f.close()
 
     import textwrap
@@ -128,7 +134,7 @@ def plot_pairplots(data, labels, alpha, mis, column_label, topk=5, prefix='', fo
             subdata = pd.DataFrame(data=subdata, columns=columns)
 
             try:
-                sns.pairplot(subdata, kind="reg", diag_kind="kde", size=5)
+                sns.pairplot(subdata, kind="reg", diag_kind="kde", size=5, dropna=True)
                 filename = '{}/pairplots_regress/group_num={}.pdf'.format(prefix, j)
                 if not os.path.exists(os.path.dirname(filename)):
                     os.makedirs(os.path.dirname(filename))
@@ -140,7 +146,7 @@ def plot_pairplots(data, labels, alpha, mis, column_label, topk=5, prefix='', fo
 
             subdata['Latent factor'] = labels[:,j]
             try:
-                sns.pairplot(subdata, kind="scatter", vars=subdata.columns.drop('Latent factor'), hue="Latent factor", diag_kind="kde", size=5)
+                sns.pairplot(subdata, kind="scatter", dropna=True, vars=subdata.columns.drop('Latent factor'), hue="Latent factor", diag_kind="kde", size=5)
                 filename = '{}/pairplots/group_num={}.pdf'.format(prefix, j)
                 if not os.path.exists(os.path.dirname(filename)):
                     os.makedirs(os.path.dirname(filename))
