@@ -1,13 +1,17 @@
 """Maximally Informative Representations using CORrelation EXplanation
 
+Main ideas first described in:
 Greg Ver Steeg and Aram Galstyan. "Maximally Informative
 Hierarchical Representations of High-Dimensional Data"
 AISTATS, 2015. arXiv preprint(arXiv:1410.7404.)
 
-Code below written by:
-Greg Ver Steeg (gregv@isi.edu), 2015.
+The Bayesian smoothing option is described in:
+Pepke and Ver Steeg, Comprehensive discovery of subsample gene expression components
+by information explanation: therapeutic implications in cancer. BMC Medical Genomics, 2017.
 
-License: Apache V2 (This development version not yet released)
+Code below written by: Greg Ver Steeg (gregv@isi.edu)
+
+License: Apache V2
 """
 
 from __future__ import print_function
@@ -100,6 +104,10 @@ class Corex(object):
     [2]     Greg Ver Steeg and Aram Galstyan. "Maximally Informative
             Hierarchical Representations of High-Dimensional Data"
             AISTATS, 2015. arXiv preprint(arXiv:1410.7404.)
+
+    [3]     Pepke and Ver Steeg, Comprehensive discovery of subsample
+            gene expression components by information explanation:
+            therapeutic implications in cancer. BMC Medical Genomics, 2017.
 
     """
     def __init__(self, n_hidden=2, dim_hidden=2,            # Size of representations
