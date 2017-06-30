@@ -21,7 +21,7 @@ from os import makedirs
 from os import path
 from numpy import ma
 from scipy.misc import logsumexp  # Tested with 0.13.0
-from multiprocessing import Pool
+from multiprocessing.dummy import Pool
 
 
 def unwrap_f(arg):
@@ -111,7 +111,7 @@ class Corex(object):
 
     """
     def __init__(self, n_hidden=2, dim_hidden=2,            # Size of representations
-                 max_iter=100, n_repeat=1, ram=8., max_samples=1000, n_cpu=1,   # Computational limits
+                 max_iter=100, n_repeat=1, ram=8., max_samples=10000, n_cpu=1,   # Computational limits
                  eps=1e-5, marginal_description='gaussian', smooth_marginals=False,    # Parameters
                  missing_values=-1, seed=None, verbose=False):
 
