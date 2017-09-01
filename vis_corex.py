@@ -22,7 +22,7 @@ def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_o
 
     alpha = corex.alpha[:, :, 0]
 
-    print 'Groups in sorted_groups.txt'
+    print('Groups in sorted_groups.txt')
     output_groups(corex.tcs, alpha, corex.mis, column_label, prefix=prefix)
     output_labels(corex.labels, row_label, prefix=prefix)
     output_cont_labels(corex.p_y_given_x, row_label, prefix=prefix)
@@ -30,7 +30,7 @@ def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_o
     anomalies(corex.log_z, row_label=row_label, prefix=prefix)
 
     if data is not None:
-        print 'Pairwise plots among high TC variables in "relationships"'
+        print('Pairwise plots among high TC variables in "relationships"')
         data_to_plot = np.where(data == corex.missing_values, np.nan, data)
         cont = cont3(corex.p_y_given_x)
         plot_heatmaps(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix, focus=focus)
@@ -162,7 +162,7 @@ def make_graph(weights, node_weights, column_label, max_edges=100):
     all_edges = np.hstack(map(np.ravel, weights))
     max_edges = min(max_edges, len(all_edges))
     w_thresh = np.sort(all_edges)[-max_edges]
-    print 'weight threshold is %f for graph with max of %f edges ' % (w_thresh, max_edges)
+    print('weight threshold is %f for graph with max of %f edges ' % (w_thresh, max_edges))
     g = nx.DiGraph()
     max_node_weight = max([max(w) for w in node_weights])
     for layer, weight in enumerate(weights):
@@ -351,7 +351,7 @@ def edge2pdf(g, filename, threshold=0, position=None, labels=None, connected=Tru
     if connected:
         touching = list(set(sum([[a, b] for a, b in g.edges()], [])))
         g = nx.subgraph(g, touching)
-        print 'non-isolated nodes,edges', len(list(g.nodes())), len(list(g.edges()))
+        print('non-isolated nodes,edges', len(list(g.nodes())), len(list(g.edges())))
     f = safe_open(filename + '.dot', 'w+')
     if directed:
         f.write("strict digraph {\n".encode('utf-8'))
@@ -434,8 +434,8 @@ def predictable(out, data, wdict=None, topk=5, outfile='sorted_groups.txt', grap
             ixys.append(0)
             nmis.append(0)
     f = safe_open(prefix + outfile, 'w+')
-    print list(enumerate(np.argsort(-np.array(nmis))))
-    print ','.join(map(str, list(np.argsort(-np.array(nmis)))))
+    print(list(enumerate(np.argsort(-np.array(nmis)))))
+    print(','.join(map(str, list(np.argsort(-np.array(nmis))))))
     for i, top in enumerate(np.argsort(-np.array(nmis))):
         f.write('Group num: %d, Score: %0.3f\n' % (top, nmis[top]))
         inds = np.where(alpha[top] > athresh)[0]
@@ -443,12 +443,13 @@ def predictable(out, data, wdict=None, topk=5, outfile='sorted_groups.txt', grap
         for ind in inds:
             f.write(wdict[ind] + ', %0.3f\n' % (mis[top, ind] / np.log(2)))
         if wdict:
-            print ','.join(map(lambda q: wdict[q], inds))
-            print ','.join(map(str, inds))
-        print top
-        print nmis[top], ixys[top], hys[top], ixys[top] / hys[top]  #,lasttc[-1][top],hys[top],lasttc[-1][top]/hys[top]
+            print(','.join(map(lambda q: wdict[q], inds)))
+            print(','.join(map(str, inds)))
+        print(top)
+        print(nmis[top], ixys[top], hys[top], ixys[top] / hys[top])
+        #,lasttc[-1][top],hys[top],lasttc[-1][top]/hys[top]
         if graphs:
-            print inds
+            print(inds)
             if len(inds) >= 2:
                 plot_rels(data[:, inds[:5]], map(lambda q: wdict[q], inds[:5]),
                           outfile='relationships/' + str(i) + '_group_num=' + str(top), latent=out[1][:, top],
@@ -546,7 +547,7 @@ def cont3(p_y_given_x):
             allcont.append(Y)
         out = np.array(allcont).T
     else:
-        print 'error, not able to visualize with k > 3'
+        print('error, not able to visualize with k > 3')
     return out
 
 def cont3_test(p_y_given_x, p_test):
@@ -655,7 +656,7 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
     if not len(args) == 1:
-        print "Run with '-h' option for usage help."
+        print("Run with '-h' option for usage help.")
         sys.exit()
 
     np.set_printoptions(precision=3, suppress=True)  # For legible output from numpy
@@ -696,26 +697,26 @@ if __name__ == '__main__':
             X = np.array(data, dtype=int)  # Data matrix in numpy format
             marg = 'discrete'
     except:
-        print "Incorrect data format.\nCheck that you've correctly specified options " \
+        print("Incorrect data format.\nCheck that you've correctly specified options " \
               "such as continuous or not, \nand if there is a header row or column.\n" \
               "Also, missing values should be specified with a numeric value (-1 by default).\n" \
-              "Run 'python vis_corex.py -h' option for help with options."
+              "Run 'python vis_corex.py -h' option for help with options.")
         traceback.print_exc(file=sys.stdout)
         sys.exit()
 
     if verbose:
-        print '\nData summary: X has %d rows and %d columns' % X.shape
+        print('\nData summary: X has %d rows and %d columns' % X.shape)
         if variable_names:
-            print 'Variable names are: ' + ','.join(map(str, list(enumerate(variable_names))))
+            print('Variable names are: ' + ','.join(map(str, list(enumerate(variable_names)))))
 
     # Run CorEx on data
     if verbose:
-        print 'Getting CorEx results'
+        print('Getting CorEx results')
         corexes = []
     if not options.regraph:
         for l, layer in enumerate(layers):
             if verbose:
-                print "Layer ", l
+                print("Layer ", l)
             if l == 0:
                 t0 = time()
                 corexes = [ce.Corex(n_hidden=layer, dim_hidden=options.dim_hidden,
@@ -723,7 +724,7 @@ if __name__ == '__main__':
                                     smooth_marginals=options.smooth,
                                     missing_values=options.missing, n_repeat=options.repeat, max_iter=options.max_iter,
                                     n_cpu=options.cpu, ram=options.ram).fit(X)]
-                print 'Time for first layer: %0.2f' % (time() - t0)
+                print('Time for first layer: %0.2f' % (time() - t0))
             else:
                 X_prev = corexes[-1].labels
                 corexes.append(ce.Corex(n_hidden=layer, dim_hidden=options.dim_hidden,
@@ -733,7 +734,7 @@ if __name__ == '__main__':
                                         n_cpu=options.cpu, ram=options.ram).fit(X_prev))
         for l, corex in enumerate(corexes):
             # The learned model can be loaded again using ce.Corex().load(filename)
-            print 'TC at layer %d is: %0.3f' % (l, corex.tc)
+            print('TC at layer %d is: %0.3f' % (l, corex.tc))
             corex.save(options.output + '/layer_' + str(l) + '.dat')
     else:
         corexes = [ce.Corex().load(options.output + '/layer_' + str(l) + '.dat') for l in range(len(layers))]
