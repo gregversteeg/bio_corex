@@ -19,8 +19,8 @@ You can also see applications of this code to neuroscience data
 [*here*](https://www.researchgate.net/profile/Madelaine_Daianu2/publication/299377637_Relative_Value_of_Diverse_Brain_MRI_and_Blood-Based_Biomarkers_for_Predicting_Cognitive_Decline_in_the_Elderly/links/56f2b0bd08aea5a8982ff958.pdf), 
 and [*here.*](https://www.researchgate.net/profile/Madelaine_Daianu2/publication/305726530_Information-Theoretic_Clustering_of_Neuroimaging_Metrics_Related_to_Cognitive_Decline_in_the_Elderly/links/57a8ab9d08aed76703f87777.pdf)
 
-For sparse binary data, try [*CorEx topic*](http://github.com/gregversteeg/corex_topic/). We are also working
-on a linear version of CorEx that is dramatically faster. Contact me if you'd like to try that out. 
+For sparse binary data, try [*CorEx topic*](http://github.com/gregversteeg/corex_topic/). 
+There is also a [linear CorEx](https://github.com/gregversteeg/LinearCorex) that is quite fast, and in the paper, [Low Complexity Gaussian Latent Factor Models and a Blessing of Dimensionality](https://arxiv.org/abs/1706.03353), we showed that CorEx exhibits unique advantages in under-sampled, high-dimensional data. 
 
 ### Dependencies
 
