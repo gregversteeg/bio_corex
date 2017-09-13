@@ -58,7 +58,7 @@ def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, pre
     for j, corex in enumerate(corexes):
         parameter_dict[j] = {}
         for param in params:
-            parameter_dict[j][param] = getattr(corex, param)
+            parameter_dict[j][param] = getattr(corex, param, None)
         f.write('At layer: %d, Total TC: %0.3f\n' % (j, corex.tc))
         f.write('Individual TCS:' + str(corex.tcs) + '\n')
         plot_convergence(corex.tc_history, prefix=prefix, prefix2=j)
