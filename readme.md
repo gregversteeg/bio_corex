@@ -1,4 +1,4 @@
-#Bio CorEx: recover latent factors with Correlation Explanation (CorEx)
+# Bio CorEx: recover latent factors with Correlation Explanation (CorEx)
 
 The principle of Total *Cor*-relation *Ex*-planation has recently been introduced as a way to reconstruct latent factors
 that are informative about relationships in data. This project consists of python code to build these representations.
@@ -22,7 +22,7 @@ and [*here.*](https://www.researchgate.net/profile/Madelaine_Daianu2/publication
 For sparse binary data, try [*CorEx topic*](http://github.com/gregversteeg/corex_topic/). We are also working
 on a linear version of CorEx that is dramatically faster. Contact me if you'd like to try that out. 
 
-###Dependencies
+### Dependencies
 
 CorEx only requires numpy and scipy. If you use OS X, I recommend installing the [Scipy Superpack](http://fonnesbeck.github.io/ScipySuperpack/).
 
@@ -34,7 +34,7 @@ The visualization capabilities in vis_corex.py require other packages:
 * [graphviz](http://www.graphviz.org) (Optional, for compiling produced .dot files into pretty graphs. The command line 
 tools are called from vis_corex. Graphviz should be compiled with the triangulation library *gts* for best visual results).
 
-###Install
+### Install
 
 To install, download using [this link](https://github.com/gregversteeg/bio_corex/archive/master.zip) 
 or clone the project by executing this command in your target directory:
