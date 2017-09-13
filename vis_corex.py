@@ -4,6 +4,7 @@
 import os
 from itertools import combinations
 import numpy as np
+from numpy import ma
 import matplotlib
 matplotlib.use('Agg')
 import pylab
@@ -11,6 +12,8 @@ import networkx as nx
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+from scipy.misc import logsumexp  # Tested with 0.13.0
+import json
 
 
 def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_output', focus='', topk=5):
@@ -25,19 +28,20 @@ def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_o
     print('Groups in sorted_groups.txt')
     output_groups(corex.tcs, alpha, corex.mis, column_label, prefix=prefix)
     output_labels(corex.labels, row_label, prefix=prefix)
-    output_cont_labels(corex.p_y_given_x, row_label, prefix=prefix)
     output_strong(corex.tcs, alpha, corex.mis, corex.labels, prefix=prefix)
     anomalies(corex.log_z, row_label=row_label, prefix=prefix)
+    plot_convergence(corex.tc_history, prefix=prefix)
 
     if data is not None:
         print('Pairwise plots among high TC variables in "relationships"')
         data_to_plot = np.where(data == corex.missing_values, np.nan, data)
-        cont = cont3(corex.p_y_given_x)
+        log_p_y_given_x = calculate_log_latent(corex, data)
+        cont = cont3(log_p_y_given_x)
+        output_cont_labels(log_p_y_given_x, row_label, prefix=prefix)
         plot_heatmaps(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix, focus=focus)
         plot_pairplots(data_to_plot, corex.labels, alpha, corex.mis, column_label, prefix=prefix, focus=focus, topk=topk)
         plot_top_relationships(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix, topk=topk)
         # plot_top_relationships(data_to_plot, corex.labels, alpha, mis, column_label, corex.log_z[:,:,0].T, prefix=prefix+'anomaly_')
-    plot_convergence(corex.tc_history, prefix=prefix)
 
 
 def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, prefix=''):
@@ -48,7 +52,13 @@ def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, pre
         row_label = list(map(str, range(corexes[0].labels.shape[0])))
 
     f = safe_open(prefix + '/text_files/higher_layer_group_tcs.txt', 'w+')
+    params = ['dim_hidden', 'eps', 'marginal_description', 'max_iter', 'max_samples', 'missing_values', 'n_cpu',
+              'n_hidden', 'n_repeat', 'n_samples', 'n_visible', 'ram', 'smooth_marginals']
+    parameter_dict = {}
     for j, corex in enumerate(corexes):
+        parameter_dict[j] = {}
+        for param in params:
+            parameter_dict[j][param] = getattr(corex, param)
         f.write('At layer: %d, Total TC: %0.3f\n' % (j, corex.tc))
         f.write('Individual TCS:' + str(corex.tcs) + '\n')
         plot_convergence(corex.tc_history, prefix=prefix, prefix2=j)
@@ -68,6 +78,8 @@ def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, pre
         g.close()
         h.close()
     f.close()
+    with open('{}/text_files/parameters.json'.format(prefix), 'w') as fp:
+        json.dump(parameter_dict, fp)
 
     import textwrap
     column_label = list(map(lambda q: '\n'.join(textwrap.wrap(q, width=17, break_long_words=False)), column_label))
@@ -229,11 +241,11 @@ def output_labels(labels, row_label, prefix=''):
     f.close()
 
 
-def output_cont_labels(p_y_given_x, row_label, prefix=''):
+def output_cont_labels(log_p_y_given_x, row_label, prefix=''):
     f = safe_open(prefix + '/text_files/cont_labels.txt', 'w+')
-    m, ns, k = p_y_given_x.shape
+    m, ns, k = log_p_y_given_x.shape
     # assert k==2, 'More complicated if k>2... use cont3_test to generate if k==3'
-    labels = cont3(p_y_given_x)
+    labels = cont3(log_p_y_given_x)
     for l in range(ns):
         f.write(row_label[l] + ',' + ','.join(map(lambda q: '%0.6f' % q, labels[l, :])) + '\n')
     f.close()
@@ -524,18 +536,19 @@ def plot_rels(data, labels=None, colors=None, outfile="rels", latent=None, alpha
     return True
 
 
-def cont3(p_y_given_x):
+def cont3(log_p_y_given_x):
     """
     Returns an ordering for points in a simplex (using manifold learning methods).
     This is used for shading points in relationships/ plots.
     """
-    nv, ns, k = p_y_given_x.shape
+    nv, ns, k = log_p_y_given_x.shape
+    p_y_given_x = np.exp(log_p_y_given_x)
     allcont = []
     if k == 3:
         for j in range(nv):
             ends = sorted([(np.dot(p_y_given_x[j, :, end[0]], p_y_given_x[j, :, end[1]]), end) for end in
                            [(0, 1), (0, 2), (1, 2)]])[0][1]
-            cont = np.log(p_y_given_x[j, :, ends[0]]) - np.log(p_y_given_x[j, :, ends[1]])
+            cont = log_p_y_given_x[j, :, ends[0]] - log_p_y_given_x[j, :, ends[1]]
             cont = np.where(np.isnan(cont), 0, cont)
             allcont.append(cont)
         out = np.array(allcont).T  # Bounds approximately reflect log of float precision
@@ -568,6 +581,29 @@ def cont3_test(p_y_given_x, p_test):
     top = np.max(np.abs(np.where(np.isinf(out), 0, out)))
     out = np.clip(out, -top, top)
     return out
+
+
+def calculate_log_latent(corex, X):
+    """"Calculate the log probabilities for hidden factors for each sample, with high precision."""
+    Xm = ma.masked_equal(X, corex.missing_values)
+    n_samples, n_visible = Xm.shape
+    n_hidden, dim_hidden, ram = corex.n_hidden, corex.dim_hidden, corex.ram
+    log_p_y_given_x_unnorm = np.empty((n_hidden, n_samples, dim_hidden))
+    memory_size = float(n_samples * n_visible * n_hidden * dim_hidden * 64) / 1000**3  # GB
+    batch_size = np.clip(int(ram * n_samples / memory_size), 1, n_samples)
+    for l in range(0, n_samples, batch_size):
+        log_marg_x = corex.calculate_marginals_on_samples(corex.theta, Xm[l:l+batch_size])  # LLRs for each sample, for each var.
+        log_p_y_given_x_unnorm[:, l:l+batch_size, :] = corex.log_p_y + np.einsum('ikl,ijkl->ijl', corex.alpha, log_marg_x)
+    return normalize_latent(log_p_y_given_x_unnorm, n_hidden)
+
+def normalize_latent(log_p_y_given_x_unnorm, n_hidden):
+    """We need to normalize log p(y|x) with high precision... This is a hack to recalculate those since
+    they are not provided in corex.py.
+    """
+    log_z = logsumexp(log_p_y_given_x_unnorm, axis=2)  # Essential to maintain precision.
+    log_z = log_z.reshape((n_hidden, -1, 1))
+    return log_p_y_given_x_unnorm - log_z
+
 
 if __name__ == '__main__':
     # Command line interface
