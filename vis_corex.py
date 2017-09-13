@@ -16,13 +16,13 @@ import pandas as pd
 def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_output', focus='', topk=5):
     """Various visualizations and summary statistics for a one layer representation"""
     if column_label is None:
-        column_label = map(str, range(data.shape[1]))
+        column_label = list(map(str, range(data.shape[1])))
     if row_label is None:
-        row_label = map(str, range(corex.n_samples))
+        row_label = list(map(str, range(corex.n_samples)))
 
     alpha = corex.alpha[:, :, 0]
 
-    print 'Groups in sorted_groups.txt'
+    print('Groups in sorted_groups.txt')
     output_groups(corex.tcs, alpha, corex.mis, column_label, prefix=prefix)
     output_labels(corex.labels, row_label, prefix=prefix)
     output_cont_labels(corex.p_y_given_x, row_label, prefix=prefix)
@@ -30,7 +30,7 @@ def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_o
     anomalies(corex.log_z, row_label=row_label, prefix=prefix)
 
     if data is not None:
-        print 'Pairwise plots among high TC variables in "relationships"'
+        print('Pairwise plots among high TC variables in "relationships"')
         data_to_plot = np.where(data == corex.missing_values, np.nan, data)
         cont = cont3(corex.p_y_given_x)
         plot_heatmaps(data_to_plot, corex.labels, alpha, corex.mis, column_label, cont, prefix=prefix, focus=focus)
@@ -43,9 +43,9 @@ def vis_rep(corex, data=None, row_label=None, column_label=None, prefix='corex_o
 def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, prefix=''):
     """Visualize a hierarchy of representations."""
     if column_label is None:
-        column_label = map(str, range(corexes[0].alpha.shape[1]))
+        column_label = list(map(str, range(corexes[0].alpha.shape[1])))
     if row_label is None:
-        row_label = map(str, range(corexes[0].labels.shape[0]))
+        row_label = list(map(str, range(corexes[0].labels.shape[0])))
 
     f = safe_open(prefix + '/text_files/higher_layer_group_tcs.txt', 'w+')
     for j, corex in enumerate(corexes):
@@ -70,7 +70,7 @@ def vis_hierarchy(corexes, row_label=None, column_label=None, max_edges=100, pre
     f.close()
 
     import textwrap
-    column_label = map(lambda q: '\n'.join(textwrap.wrap(q, width=17, break_long_words=False)), column_label)
+    column_label = list(map(lambda q: '\n'.join(textwrap.wrap(q, width=17, break_long_words=False)), column_label))
 
     # Construct non-tree graph
     weights = [corex.alpha[:, :, 0].clip(0, 1) * corex.mis for corex in corexes]
@@ -113,7 +113,7 @@ def plot_heatmaps(data, labels, alpha, mis, column_label, cont, topk=20, prefix=
             plt.title("Latent factor {}".format(j))
             plt.savefig(filename, bbox_inches='tight')
             plt.close('all')
-            #plot_rels(data[:, inds], map(lambda q: column_label[q], inds), colors=cont[:, j],
+            #plot_rels(data[:, inds], list(map(lambda q: column_label[q], inds)), colors=cont[:, j],
             #          outfile=prefix + '/relationships/group_num=' + str(j), latent=labels[:, j], alpha=0.1)
 
 def plot_pairplots(data, labels, alpha, mis, column_label, topk=5, prefix='', focus=''):
@@ -162,7 +162,7 @@ def make_graph(weights, node_weights, column_label, max_edges=100):
     all_edges = np.hstack(map(np.ravel, weights))
     max_edges = min(max_edges, len(all_edges))
     w_thresh = np.sort(all_edges)[-max_edges]
-    print 'weight threshold is %f for graph with max of %f edges ' % (w_thresh, max_edges)
+    print('weight threshold is %f for graph with max of %f edges ' % (w_thresh, max_edges))
     g = nx.DiGraph()
     max_node_weight = max([max(w) for w in node_weights])
     for layer, weight in enumerate(weights):
@@ -261,7 +261,7 @@ def plot_top_relationships(data, labels, alpha, mis, column_label, cont, topk=5,
         inds = np.where(alpha[j] > athresh)[0]
         inds = inds[np.argsort(- alpha[j, inds] * mis[j, inds])][:topk]
         if len(inds) >= 2:
-            plot_rels(data[:, inds], map(lambda q: column_label[q], inds), colors=cont[:, j],
+            plot_rels(data[:, inds], list(map(lambda q: column_label[q], inds)), colors=cont[:, j],
                       outfile=prefix + '/relationships/group_num=' + str(j), latent=labels[:, j], alpha=0.1)
 
 
@@ -270,7 +270,7 @@ def anomalies(log_z, row_label=None, prefix=''):
 
     ns = log_z.shape[1]
     if row_label is None:
-        row_label = map(str, range(ns))
+        row_label = list(map(str, range(ns)))
     a_score = np.sum(log_z[:, :, 0], axis=0)
     mean, std = np.mean(a_score), np.std(a_score)
     a_score = (a_score - mean) / std
@@ -344,15 +344,15 @@ def edge2pdf(g, filename, threshold=0, position=None, labels=None, connected=Tru
     def cnn(node):
         #change node names for dot format
         if type(node) is tuple or type(node) is list:
-            return u'n' + u'_'.join(map(unicode, node))
+            return u'n' + u'_'.join(map(str, node))
         else:
-            return unicode(node)
+            return str(node)
 
     if connected:
         touching = list(set(sum([[a, b] for a, b in g.edges()], [])))
         g = nx.subgraph(g, touching)
-        print 'non-isolated nodes,edges', len(list(g.nodes())), len(list(g.edges()))
-    f = safe_open(filename + '.dot', 'w+')
+        print('non-isolated nodes,edges', len(list(g.nodes())), len(list(g.edges())))
+    f = safe_open(filename + '.dot', 'wb+')
     if directed:
         f.write("strict digraph {\n".encode('utf-8'))
     else:
@@ -360,7 +360,7 @@ def edge2pdf(g, filename, threshold=0, position=None, labels=None, connected=Tru
     #f.write("\tgraph [overlap=scale];\n".encode('utf-8'))
     f.write("\tnode [shape=point];\n".encode('utf-8'))
     for a, b, d in g.edges(data=True):
-        if d.has_key('weight'):
+        if 'weight' in d:
             if directed:
                 f.write(("\t" + cnn(a) + ' -> ' + cnn(b) + ' [penwidth=%.2f' % float(
                     np.clip(d['weight'], 0, 9)) + '];\n').encode('utf-8'))
@@ -379,7 +379,7 @@ def edge2pdf(g, filename, threshold=0, position=None, labels=None, connected=Tru
                 thislabel = labels[n].replace(u'"', u'\\"')
                 lstring = u'label="' + thislabel + u'",shape=none'
             elif type(labels) == str:
-                if g.node[n].has_key('label'):
+                if 'label' in g.node[n]:
                     thislabel = g.node[n][labels].replace(u'"', u'\\"')
                     # combine dupes
                     #llist = thislabel.split(',')
@@ -395,13 +395,13 @@ def edge2pdf(g, filename, threshold=0, position=None, labels=None, connected=Tru
                         lstring = u'shape=point,height=%0.2f' % weight
             else:
                 lstring = 'label="' + str(n) + '",shape=none'
-            lstring = unicode(lstring)
+            #lstring = unicode(lstring)
         else:
             lstring = False
         if position is not None:
             if position == 'grid':
                 position = [(i % 28, 28 - i / 28) for i in range(784)]
-            posstring = unicode('pos="' + str(position[n][0]) + ',' + str(position[n][1]) + '"')
+            posstring = 'pos="' + str(position[n][0]) + ',' + str(position[n][1]) + '"'
         else:
             posstring = False
         finalstring = u' [' + u','.join([ts for ts in [posstring, lstring] if ts]) + u']\n'
@@ -434,8 +434,8 @@ def predictable(out, data, wdict=None, topk=5, outfile='sorted_groups.txt', grap
             ixys.append(0)
             nmis.append(0)
     f = safe_open(prefix + outfile, 'w+')
-    print list(enumerate(np.argsort(-np.array(nmis))))
-    print ','.join(map(str, list(np.argsort(-np.array(nmis)))))
+    print(list(enumerate(np.argsort(-np.array(nmis)))))
+    print(','.join(map(str, list(np.argsort(-np.array(nmis))))))
     for i, top in enumerate(np.argsort(-np.array(nmis))):
         f.write('Group num: %d, Score: %0.3f\n' % (top, nmis[top]))
         inds = np.where(alpha[top] > athresh)[0]
@@ -443,14 +443,15 @@ def predictable(out, data, wdict=None, topk=5, outfile='sorted_groups.txt', grap
         for ind in inds:
             f.write(wdict[ind] + ', %0.3f\n' % (mis[top, ind] / np.log(2)))
         if wdict:
-            print ','.join(map(lambda q: wdict[q], inds))
-            print ','.join(map(str, inds))
-        print top
-        print nmis[top], ixys[top], hys[top], ixys[top] / hys[top]  #,lasttc[-1][top],hys[top],lasttc[-1][top]/hys[top]
+            print(','.join(map(lambda q: wdict[q], inds)))
+            print(','.join(map(str, inds)))
+        print(top)
+        print(nmis[top], ixys[top], hys[top], ixys[top] / hys[top])
+        #,lasttc[-1][top],hys[top],lasttc[-1][top]/hys[top]
         if graphs:
-            print inds
+            print(inds)
             if len(inds) >= 2:
-                plot_rels(data[:, inds[:5]], map(lambda q: wdict[q], inds[:5]),
+                plot_rels(data[:, inds[:5]], list(map(lambda q: wdict[q], inds[:5])),
                           outfile='relationships/' + str(i) + '_group_num=' + str(top), latent=out[1][:, top],
                           alpha=tvalue)
     f.close()
@@ -478,7 +479,7 @@ def plot_convergence(tc_history, prefix='', prefix2=''):
 def plot_rels(data, labels=None, colors=None, outfile="rels", latent=None, alpha=0.8):
     ns, n = data.shape
     if labels is None:
-        labels = map(str, range(n))
+        labels = list(map(str, range(n)))
     ncol = 5
     # ncol = 4
     nrow = int(np.ceil(float(n * (n - 1) / 2) / ncol))
@@ -546,7 +547,7 @@ def cont3(p_y_given_x):
             allcont.append(Y)
         out = np.array(allcont).T
     else:
-        print 'error, not able to visualize with k > 3'
+        print('error, not able to visualize with k > 3')
     return out
 
 def cont3_test(p_y_given_x, p_test):
@@ -655,11 +656,11 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
     if not len(args) == 1:
-        print "Run with '-h' option for usage help."
+        print("Run with '-h' option for usage help.")
         sys.exit()
 
     np.set_printoptions(precision=3, suppress=True)  # For legible output from numpy
-    layers = map(int, options.layers.split(','))
+    layers = list(map(int, options.layers.split(',')))
     if layers[-1] != 1:
         layers.append(1)  # Last layer has one unit for convenience so that graph is fully connected.
     verbose = options.verbose
@@ -677,7 +678,7 @@ if __name__ == '__main__':
         if options.nc:
             variable_names = None
         else:
-            variable_names = reader.next()[(1 - options.nr):]
+            variable_names = next(reader)[(1 - options.nr):]
         sample_names = []
         data = []
         for row in reader:
@@ -685,7 +686,7 @@ if __name__ == '__main__':
                 sample_names = None
             else:
                 sample_names.append(row[0])
-            tmp = map(fill_empty, row[(1 - options.nr):])
+            tmp = list(map(fill_empty, row[(1 - options.nr):]))
             data.append(tmp)
 
     try:
@@ -696,26 +697,26 @@ if __name__ == '__main__':
             X = np.array(data, dtype=int)  # Data matrix in numpy format
             marg = 'discrete'
     except:
-        print "Incorrect data format.\nCheck that you've correctly specified options " \
+        print("Incorrect data format.\nCheck that you've correctly specified options " \
               "such as continuous or not, \nand if there is a header row or column.\n" \
               "Also, missing values should be specified with a numeric value (-1 by default).\n" \
-              "Run 'python vis_corex.py -h' option for help with options."
+              "Run 'python vis_corex.py -h' option for help with options.")
         traceback.print_exc(file=sys.stdout)
         sys.exit()
 
     if verbose:
-        print '\nData summary: X has %d rows and %d columns' % X.shape
+        print('\nData summary: X has %d rows and %d columns' % X.shape)
         if variable_names:
-            print 'Variable names are: ' + ','.join(map(str, list(enumerate(variable_names))))
+            print('Variable names are: ' + ','.join(map(str, list(enumerate(variable_names)))))
 
     # Run CorEx on data
     if verbose:
-        print 'Getting CorEx results'
+        print('Getting CorEx results')
         corexes = []
     if not options.regraph:
         for l, layer in enumerate(layers):
             if verbose:
-                print "Layer ", l
+                print("Layer ", l)
             if l == 0:
                 t0 = time()
                 corexes = [ce.Corex(n_hidden=layer, dim_hidden=options.dim_hidden,
@@ -723,7 +724,7 @@ if __name__ == '__main__':
                                     smooth_marginals=options.smooth,
                                     missing_values=options.missing, n_repeat=options.repeat, max_iter=options.max_iter,
                                     n_cpu=options.cpu, ram=options.ram).fit(X)]
-                print 'Time for first layer: %0.2f' % (time() - t0)
+                print('Time for first layer: %0.2f' % (time() - t0))
             else:
                 X_prev = corexes[-1].labels
                 corexes.append(ce.Corex(n_hidden=layer, dim_hidden=options.dim_hidden,
@@ -733,7 +734,7 @@ if __name__ == '__main__':
                                         n_cpu=options.cpu, ram=options.ram).fit(X_prev))
         for l, corex in enumerate(corexes):
             # The learned model can be loaded again using ce.Corex().load(filename)
-            print 'TC at layer %d is: %0.3f' % (l, corex.tc)
+            print('TC at layer %d is: %0.3f' % (l, corex.tc))
             corex.save(options.output + '/layer_' + str(l) + '.dat')
     else:
         corexes = [ce.Corex().load(options.output + '/layer_' + str(l) + '.dat') for l in range(len(layers))]
