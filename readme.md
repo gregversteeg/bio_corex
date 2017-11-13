@@ -194,7 +194,7 @@ like layer.tcs. Do all the Y_j's explain some correlation (i.e., all the TCs are
 you should probably use a smaller representation.
 
 ### Missing values
-You can set missing values (by specifying missing_values=-1, when calling, e.g.). CorEx seems very robust to missing data.
+You can set missing values (by specifying missing_values=-1, when calling, e.g.). CorEx seems robust to missing data.
 This hasn't been extensively tested yet though, and we don't really understand the 
 effect of data missing not at random. 
 
@@ -206,7 +206,7 @@ of samples is small (less than 200) or the number of variables or dim_hidden are
 Also note that CorEx can find different local optima after different random restarts. You can run it k times and take
 the best solution with the "repeat" option. 
 
-
+Warning: in recent experiments on gene expression that contained lots of zero counts, we got bad results. (The paper had removed columns that included zero counts.)  I'm not sure what the underlying cause is (bad data versus some issue that CorEx has with zero-inflated data), but I strongly recommend removing columns/genes with lots of zeros. 
 
 ### Troubleshooting visualization
 To get the visualization of the hierarchy looking nice sometimes takes a little effort. To get graphs to compile correctly do the following. 
