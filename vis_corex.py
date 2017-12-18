@@ -563,7 +563,7 @@ def cont3(log_p_y_given_x):
         print('error, not able to visualize with k > 3')
     return out
 
-def cont3_test(p_y_given_x, p_test):
+def cont3_test(p_y_given_x, p_test, logp=False):
     """
     What if we need the same continuous representation for test data? If k==3,(or above) we have to make sure we
     do the same transformation as the reference data.
@@ -574,7 +574,10 @@ def cont3_test(p_y_given_x, p_test):
     for j in range(nv):
         ends = sorted([(np.dot(p_y_given_x[j, :, end[0]], p_y_given_x[j, :, end[1]]), end) for end in
                        [(0, 1), (0, 2), (1, 2)]])[0][1]
-        cont = np.log(p_test[j, :, ends[0]]) - np.log(p_test[j, :, ends[1]])
+        if logp:
+            cont = p_test[j, :, ends[0]] - p_test[j, :, ends[1]]
+        else:
+            cont = np.log(p_test[j, :, ends[0]]) - np.log(p_test[j, :, ends[1]])
         cont = np.where(np.isnan(cont), 0, cont)
         allcont.append(cont)
     out = np.array(allcont).T  # Bounds approximately reflect log of float precision
