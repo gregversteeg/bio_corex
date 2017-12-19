@@ -99,8 +99,9 @@ X = np.array([[0,0,0,0,0], # A matrix with rows as samples and columns as variab
               [1,1,1,0,0],
               [1,1,1,1,1]], dtype=int)
 
-layer1 = ce.Corex(n_hidden=2, marginal_description='discrete', smooth_marginals=False)  
-# Define the number of hidden factors to use.
+layer1 = ce.Corex(n_hidden=2, dim_hidden=2, marginal_description='discrete', smooth_marginals=False)  
+# Define the number of hidden factors to use (n_hidden=2). 
+# And each latent factor is binary (dim_hidden=2)
 # marginal_description can be 'discrete' or 'gaussian' if your data is continuous
 # smooth_marginals = True turns on Bayesian smoothing
 layer1.fit(X)  # Fit on data. 
@@ -116,6 +117,28 @@ layer1.tcs  # TC(X;Y_j) (all info measures reported in nats).
 # TC(X_Gj) >=TC(X_Gj ; Y_j)
 # For this example, TC(X1,X2,X3)=1.386, TC(X4,X5) = 0.693
 ```
+
+Suppose you want to transform some test data (that wasn't used in training). Assume that X_test is a matrix of such data. 
+*Make sure the columns of X_test exactly match the columns of X.*  If the test data doesn't include all the same columns, you can specify missing values. Check "layer1.missing_values" or set missing_values=(some number) at training time so that you know how to set missing values in training data. For instance, the default is missing_values=-1, then you an put a -1 in your test data for any column that is missing. 
+Continuing the example above, you would generate labels on test data as follows. 
+```python
+X_test = np.array([[1,1,1,0,1]])  # 1 sample/row of data with the same 5 columns as example above
+y = layer1.transform(X_test, details=False)
+# array([[1, 0]]), I.e., Y_0 = 1 and Y_1 = 0
+p, log_z = layer1.transform(X_test, details=True)
+# p is p(yj | x), the probability of each factor taking a certain value.
+# The shape is n_hidden, number of samples, dim_hidden
+#array([[[ 0. ,  1. ]],
+#      [[ 0.5,  0.5]]])
+# So Y_0 takes values 1 with probability 1 (it matches the training example)
+# But Y_1 takes values 0 or 1 with probability 0.5 (it is a mix of the two training examples)
+test_tcs = np.mean(log_z[:,:,0], axis=1)
+# array([ 1.385, -6.216])
+# Compare this value to layer1.tcsl = array([ 1.385,  0.692])
+# This tells us that the "test TC" for factor Y_0 is similar to the training data, 
+# but the "test TC" for factor Y_1 is completely different. 
+```
+I interpret negative values in the test TC as meaning *correlations that appeared in the training data do not appear in the test data*. But we haven't studied this phenomena in depth. If you get a bunch of negative values for test TC, though, it signals a significant difference between your training and testing data. 
 
 
 ### Data format
@@ -171,7 +194,7 @@ like layer.tcs. Do all the Y_j's explain some correlation (i.e., all the TCs are
 you should probably use a smaller representation.
 
 ### Missing values
-You can set missing values (by specifying missing_values=-1, when calling, e.g.). CorEx seems very robust to missing data.
+You can set missing values (by specifying missing_values=-1, when calling, e.g.). CorEx seems robust to missing data.
 This hasn't been extensively tested yet though, and we don't really understand the 
 effect of data missing not at random. 
 
@@ -183,7 +206,7 @@ of samples is small (less than 200) or the number of variables or dim_hidden are
 Also note that CorEx can find different local optima after different random restarts. You can run it k times and take
 the best solution with the "repeat" option. 
 
-
+Warning: in recent experiments on gene expression that contained lots of zero counts, we got bad results. (The paper had removed columns that included zero counts.)  I'm not sure what the underlying cause is (bad data versus some issue that CorEx has with zero-inflated data), but I strongly recommend removing columns/genes with lots of zeros. 
 
 ### Troubleshooting visualization
 To get the visualization of the hierarchy looking nice sometimes takes a little effort. To get graphs to compile correctly do the following. 
