@@ -333,7 +333,7 @@ class Corex(object):
         batch_size = np.clip(int(self.ram * n_samples / memory_size), 1, n_samples)
         for l in range(0, n_samples, batch_size):
             log_marg_x = self.calculate_marginals_on_samples(theta, Xm[l:l+batch_size])  # LLRs for each sample, for each var.
-            log_p_y_given_x_unnorm[:, l:l+batch_size, :] = self.log_p_y + np.einsum('ikl,ijkl->ijl', self.alpha, log_marg_x)
+            log_p_y_given_x_unnorm[:, l:l+batch_size, :] = self.log_p_y + np.einsum('ikl,ijkl->ijl', self.alpha, log_marg_x, optimize=False)
         return self.normalize_latent(log_p_y_given_x_unnorm)
 
     def normalize_latent(self, log_p_y_given_x_unnorm):
@@ -471,7 +471,7 @@ class Corex(object):
         batch_size = np.clip(int(self.ram * n_visible / memory_size), 1, n_visible)
         for i in range(0, n_visible, batch_size):
             log_marg_x = self.calculate_marginals_on_samples(theta[i:i+batch_size, ...], Xm[sample, i:i+batch_size])  # n_hidden, n_samples, n_visible, dim_hidden
-            mis[:, i:i+batch_size] = np.einsum('ijl,ijkl->ik', p_y_given_x[:, sample, :], log_marg_x) / n_observed[i:i+batch_size][np.newaxis, :]
+            mis[:, i:i+batch_size] = np.einsum('ijl,ijkl->ik', p_y_given_x[:, sample, :], log_marg_x, optimize=False) / n_observed[i:i+batch_size][np.newaxis, :]
         return mis  # MI in nats
 
     def mi_bootstrap(self, Xm, n_permutation=20):
@@ -508,8 +508,8 @@ class Corex(object):
     def estimate_parameters(self, xi, p_y_given_x):
         if self.marginal_description == 'gaussian':
             n_obs = np.sum(p_y_given_x, axis=1).clip(0.1)  # m, k
-            mean_ml = np.einsum('i,jik->jk', xi, p_y_given_x) / n_obs  # ML estimate of mean of Xi
-            sig_ml = np.einsum('jik,jik->jk', (xi[np.newaxis, :, np.newaxis] - mean_ml[:, np.newaxis, :])**2, p_y_given_x) / (n_obs - 1).clip(0.01)  # UB estimate of sigma^2(variance)
+            mean_ml = np.einsum('i,jik->jk', xi, p_y_given_x, optimize=False) / n_obs  # ML estimate of mean of Xi
+            sig_ml = np.einsum('jik,jik->jk', (xi[np.newaxis, :, np.newaxis] - mean_ml[:, np.newaxis, :])**2, p_y_given_x, optimize=False) / (n_obs - 1).clip(0.01)  # UB estimate of sigma^2(variance)
 
             if not self.smooth_marginals:
                 return np.array([mean_ml, sig_ml])  # FOR EACH Y_j = k !!
@@ -554,8 +554,8 @@ class Corex(object):
         # x_copy = np.hstack([np.random.choice(xi, size=(len(xi), 1), replace=False) for _ in range(20)])
         x_copy = np.random.choice(xi, size=(len(xi), 20), replace=True)  # w/o replacement leads to...higher s.e. and more smoothing.
         m, n, k = p_y_given_x.shape
-        mean_ml = np.einsum('il,jik->jkl', x_copy, p_y_given_x) / n_obs[..., np.newaxis]  # ML estimate
-        sig_ml = np.einsum('jikl,jik->jkl', (x_copy.reshape((1, n, 1, 20)) - mean_ml.reshape((m, 1, k, 20)))**2, p_y_given_x) / (n_obs[..., np.newaxis] - 1).clip(0.01) # ML estimate
+        mean_ml = np.einsum('il,jik->jkl', x_copy, p_y_given_x, optimize=False) / n_obs[..., np.newaxis]  # ML estimate
+        sig_ml = np.einsum('jikl,jik->jkl', (x_copy.reshape((1, n, 1, 20)) - mean_ml.reshape((m, 1, k, 20)))**2, p_y_given_x, optimize=False) / (n_obs[..., np.newaxis] - 1).clip(0.01) # ML estimate
         m1 = np.mean(mean_ml, axis=2)
         m2 = np.mean(sig_ml, axis=2)
         se1 = np.sqrt(np.sum((mean_ml - m1[..., np.newaxis])**2, axis=2) / 19.)
