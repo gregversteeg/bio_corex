@@ -199,15 +199,19 @@ def make_graph(weights, node_weights, column_label, max_edges=100):
 
 
 def trim(g, max_parents=False, max_children=False):
+    if float(nx.__version__) < 2:
+        edgedict = g.edge
+    else:
+        edgedict = g.adj
     for node in g:
         if max_parents:
             parents = list(g.successors(node))
-            weights = [g.edge[node][parent]['weight'] for parent in parents]
+            weights = [edgedict[node][parent]['weight'] for parent in parents]
             for weak_parent in np.argsort(weights)[:-max_parents]:
                 g.remove_edge(node, parents[weak_parent])
         if max_children:
             children = g.predecessors(node)
-            weights = [g.edge[child][node]['weight'] for child in children]
+            weights = [edgedict[child][node]['weight'] for child in children]
             for weak_child in np.argsort(weights)[:-max_children]:
                 g.remove_edge(children[weak_child], node)
     return g
