@@ -600,7 +600,7 @@ def calculate_log_latent(corex, X):
     batch_size = np.clip(int(ram * n_samples / memory_size), 1, n_samples)
     for l in range(0, n_samples, batch_size):
         log_marg_x = corex.calculate_marginals_on_samples(corex.theta, Xm[l:l+batch_size])  # LLRs for each sample, for each var.
-        log_p_y_given_x_unnorm[:, l:l+batch_size, :] = corex.log_p_y + np.einsum('ikl,ijkl->ijl', corex.alpha, log_marg_x)
+        log_p_y_given_x_unnorm[:, l:l+batch_size, :] = corex.log_p_y + np.einsum('ikl,ijkl->ijl', corex.alpha, log_marg_x, optimize=False)
     return normalize_latent(log_p_y_given_x_unnorm, n_hidden)
 
 def normalize_latent(log_p_y_given_x_unnorm, n_hidden):
