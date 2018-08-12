@@ -88,8 +88,8 @@ the point color corresponds to p(yj|x) for that point.
 
 ### Example
 
-The API design is based on the scikit-learn package. You define a model (model=Corex(with options here)) then use
- the model.fit(data) method to fit it on data, then you can transform new data with model.transform(new_data). 
+The API design is based on the scikit-learn package. You define a model (`model=Corex(with options here)`) then use
+ the `model.fit(data)` method to fit it on data, then you can transform new data with `model.transform(new_data)`. 
  The model has many other methods to access mutual information, measures of TC, and more. 
 ```python
 import corex as ce
@@ -108,9 +108,9 @@ layer1.fit(X)  # Fit on data.
 
 layer1.clusters  # Each variable/column is associated with one Y_j
 # array([0, 0, 0, 1, 1])
-layer1.labels[0]  # Labels for each sample for Y_0
+layer1.labels[:, 0]  # Labels for each sample for Y_0
 # array([0, 0, 1, 1])
-layer1.labels[1]  # Labels for each sample for Y_1
+layer1.labels[:, 1]  # Labels for each sample for Y_1
 # array([0, 1, 0, 1])
 layer1.tcs  # TC(X;Y_j) (all info measures reported in nats). 
 # array([ 1.385,  0.692])
@@ -118,8 +118,8 @@ layer1.tcs  # TC(X;Y_j) (all info measures reported in nats).
 # For this example, TC(X1,X2,X3)=1.386, TC(X4,X5) = 0.693
 ```
 
-Suppose you want to transform some test data (that wasn't used in training). Assume that X_test is a matrix of such data. 
-*Make sure the columns of X_test exactly match the columns of X.*  If the test data doesn't include all the same columns, you can specify missing values. Check "layer1.missing_values" or set missing_values=(some number) at training time so that you know how to set missing values in training data. For instance, the default is missing_values=-1, then you an put a -1 in your test data for any column that is missing. 
+Suppose you want to transform some test data (that wasn't used in training). Assume that `X_test` is a matrix of such data. 
+*Make sure the columns of `X_test` exactly match the columns of X.*  If the test data doesn't include all the same columns, you can specify missing values. Check `layer1.missing_values` or set missing_values=(some number) at training time so that you know how to set missing values in training data. For instance, the default is missing_values=-1, then you an put a -1 in your test data for any column that is missing. 
 Continuing the example above, you would generate labels on test data as follows. 
 ```python
 X_test = np.array([[1,1,1,0,1]])  # 1 sample/row of data with the same 5 columns as example above
@@ -143,10 +143,10 @@ I interpret negative values in the test TC as meaning *correlations that appeare
 
 ### Data format
 
-You can specify the type of the variables by passing the option "marginal_description='discrete'" for discrete variables or
-"marginal_description='gaussian'" for continuous variables. 
+You can specify the type of the variables by passing the option `marginal_description='discrete'` for discrete variables or
+`marginal_description='gaussian'` for continuous variables. 
 For the discrete version of CorEx, you must input a matrix of integers whose rows represent samples and whose columns
-represent different variables. The values must be integers {0,1,...,k-1} where k represents the maximum number of 
+represent different variables. The values must be integers `{0,1,...,k-1}` where k represents the maximum number of 
 values that each variable, x_i can take. By default, entries equal to -1 are treated as missing. This can be 
 altered by passing a *missing_values* argument when initializing CorEx. 
 "smooth_marginals" tells whether to use Bayesian shrinkage estimators for marginal distributions to reduce noise.
@@ -154,15 +154,15 @@ It is turned on by default but is off in the example above (since it only has 4 
 
 ### CorEx outputs
 
-As shown in the example, *clusters* gives the variable clusters for each hidden factor Y_j and 
-*labels* gives the labels for each sample for each Y_j. 
-Probabilistic labels can be accessed with *p_y_given_x*. 
+As shown in the example, `clusters` gives the variable clusters for each hidden factor `Y_j` and 
+`labels` gives the labels for each sample for each `Y_j`. 
+Probabilistic labels can be accessed with `p_y_given_x`. 
 
-The total correlation explained by each hidden factor, TC(X;Y_j), is accessed with *tcs*. Outputs are sorted
+The total correlation explained by each hidden factor, `TC(X;Y_j)`, is accessed with `tcs`. Outputs are sorted
 so that Y_0 is always the component that explains the highest TC. 
-Like point-wise mutual information, you can define point-wise total correlation measure for an individual sample, x^l     
-TC(X = x^l;Y_j) == log Z_j(x)   
-This quantity is accessed with *log_z*. This represents the correlations explained by Y_j for an individual sample.
+Like point-wise mutual information, you can define point-wise total correlation measure for an individual sample, `x^l`     
+`TC(X = x^l;Y_j) == log Z_j(x)`   
+This quantity is accessed with `log_z`. This represents the correlations explained by `Y_j` for an individual sample.
 A low (or even negative!) number can be obtained. This can be interpreted as a measure of how surprising an individual
 observation is. This can be useful for anomaly detection. 
 
