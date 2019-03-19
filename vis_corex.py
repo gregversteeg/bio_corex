@@ -12,7 +12,7 @@ import networkx as nx
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
-from scipy.misc import logsumexp  # Tested with 0.13.0
+from scipy.special import logsumexp
 import json
 
 
@@ -146,7 +146,7 @@ def plot_pairplots(data, labels, alpha, mis, column_label, topk=5, prefix='', fo
             subdata = pd.DataFrame(data=subdata, columns=columns)
 
             try:
-                sns.pairplot(subdata, kind="reg", diag_kind="kde", size=5, dropna=True)
+                sns.pairplot(subdata, kind="reg", diag_kind="kde", height=5, dropna=True)
                 filename = '{}/pairplots_regress/group_num={}.pdf'.format(prefix, j)
                 if not os.path.exists(os.path.dirname(filename)):
                     os.makedirs(os.path.dirname(filename))
@@ -158,7 +158,7 @@ def plot_pairplots(data, labels, alpha, mis, column_label, topk=5, prefix='', fo
 
             subdata['Latent factor'] = labels[:,j]
             try:
-                sns.pairplot(subdata, kind="scatter", dropna=True, vars=subdata.columns.drop('Latent factor'), hue="Latent factor", diag_kind="kde", size=5)
+                sns.pairplot(subdata, kind="scatter", dropna=True, vars=subdata.columns.drop('Latent factor'), hue="Latent factor", diag_kind="kde", height=5)
                 filename = '{}/pairplots/group_num={}.pdf'.format(prefix, j)
                 if not os.path.exists(os.path.dirname(filename)):
                     os.makedirs(os.path.dirname(filename))

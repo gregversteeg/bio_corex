@@ -209,6 +209,9 @@ the best solution with the "repeat" option.
 Warning: in recent experiments on gene expression that contained lots of zero counts, we got bad results. (The paper had removed columns that included zero counts.)  I'm not sure what the underlying cause is (bad data versus some issue that CorEx has with zero-inflated data), but I strongly recommend removing columns/genes with lots of zeros. 
 
 ### Troubleshooting visualization
+
+For Mac users: 
+
 To get the visualization of the hierarchy looking nice sometimes takes a little effort. To get graphs to compile correctly do the following. 
 Using "brew" to install, you need to do "brew install gts" followed by "brew install --with-gts graphviz". 
 The (hacky) way that the visualizations are produced is the following. The code, vis_corex.py, produces a text file called "graphs/graph.dot". This just encodes the edges between nodes in dot format. Then, the code calls a command line utility called sfdp that is part of graphviz, 
@@ -221,6 +224,40 @@ If you want, you can try to recompile graphs yourself with different options to 
 Also, note that you can color nodes in the graphs by putting prepending a color to column label names in the CSV file.
 For instance, blue_column_1_label_name will show column_1_label_name in blue in the graphs folder. Any matplotlib colors are allowed. 
 See the BIG5 data file and graphs produced by the command line utility. 
+
+For Ubuntu users:
+
+Credits: https://gitlab.com/graphviz/graphviz/issues/1237
+
+1. Remove any existing installation with `conda uninstall graphviz`. (If you did not install with Conda, you might need to do `sudo apt purge graphviz` and/or `pip uninstall graphviz`).
+    
+2. run `sudo apt install libgts-dev`
+
+3. run `sudo pkg-config --libs gts`
+    
+4. run `sudo pkg-config --cflags gts`
+
+5. Download `graphviz-2.40.1.tar.gz` from [here](https://graphviz.gitlab.io/pub/graphviz/stable/SOURCES/graphviz.tar.gz)
+
+6. Navigate to directory containing download, and extract with `tar -xvf graphviz-2.40.1.tar.gz` (or newer whatever the download is named.)
+
+7. `cd` into extracted folder (ie `cd graphviz-2.40.1`) and run `sudo ./configure --with-gts`
+
+8. Run `sudo make` in the folder
+
+9. Run `sudo make install` in the folder
+
+10. Reinstall library using `pip install graphviz`
+    
+    
+
+Navigate to directory containing download, and extract with tar -xvf graphviz-2.40.1.tar.gz (or newer whatever the download is named.)
+
+cd into extracted folder (ie cd graphviz-2.40.1) and runsudo ./configure --with-gts
+
+Run sudo make in the folder
+Run sudo make install in the folder
+Reinstall library using pip install graphviz
 
 ### Other files that are produced
 *text_files/groups.txt*
