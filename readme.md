@@ -249,15 +249,6 @@ Credits: https://gitlab.com/graphviz/graphviz/issues/1237
 
 10. Reinstall library using `pip install graphviz`
     
-    
-
-Navigate to directory containing download, and extract with tar -xvf graphviz-2.40.1.tar.gz (or newer whatever the download is named.)
-
-cd into extracted folder (ie cd graphviz-2.40.1) and runsudo ./configure --with-gts
-
-Run sudo make in the folder
-Run sudo make install in the folder
-Reinstall library using pip install graphviz
 
 ### Other files that are produced
 *text_files/groups.txt*
