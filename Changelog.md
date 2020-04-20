@@ -17,3 +17,8 @@ Changes in readme.md
 3. added `graphviz` installation instructions for Ubuntu users
 
 4. added `requirements.txt` which lets users to install all the dependencies with a single command `conda install --yes --file requirements.txt`
+
+## April 20 - 2020
+
+Added minimum value to sig_ml of 0.5 in function estimate_parameters. This prevents divide by zero in functional marginal_p.
+
