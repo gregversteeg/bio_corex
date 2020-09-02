@@ -510,7 +510,7 @@ class Corex(object):
             n_obs = np.sum(p_y_given_x, axis=1).clip(0.1)  # m, k
             mean_ml = np.einsum('i,jik->jk', xi, p_y_given_x, optimize=False) / n_obs  # ML estimate of mean of Xi
             sig_ml = np.einsum('jik,jik->jk', (xi[np.newaxis, :, np.newaxis] - mean_ml[:, np.newaxis, :])**2, p_y_given_x, optimize=False) / (n_obs - 1).clip(0.01)  # UB estimate of sigma^2(variance)
-            sig_ml = sig_ml.clip(0.5) # To prevent divide by zero in marginal_p function
+            sig_ml = sig_ml.clip(0.25) # To prevent divide by zero in marginal_p function
             
             if not self.smooth_marginals:
                 return np.array([mean_ml, sig_ml])  # FOR EACH Y_j = k !!
