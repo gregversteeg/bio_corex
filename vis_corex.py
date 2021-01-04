@@ -171,7 +171,7 @@ def plot_pairplots(data, labels, alpha, mis, column_label, topk=5, prefix='', fo
 
 
 def make_graph(weights, node_weights, column_label, max_edges=100):
-    all_edges = np.hstack(map(np.ravel, weights))
+    all_edges = np.hstack(list(map(np.ravel, weights)))
     max_edges = min(max_edges, len(all_edges))
     w_thresh = np.sort(all_edges)[-max_edges]
     print('weight threshold is %f for graph with max of %f edges ' % (w_thresh, max_edges))
