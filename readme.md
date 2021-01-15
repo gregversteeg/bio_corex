@@ -44,6 +44,19 @@ git clone https://github.com/gregversteeg/bio_corex.git
 Use *git pull* to get updates. The code is under development. 
 Please contact me about issues.  
 
+### Issue to be resolved
+
+There's a line in the corex.py that says:
+```
+sig_ml = sig_ml.clip(0.25)
+```
+This was added after the 2015 AISTATS paper and it helped to avoid numerical errors on gene expression datasets. 
+However, thanks to a diligent user, we discovered that the finance results in the AISTATS paper don't reproduce if you have this line.
+Removing it returns the original behavior (but also leads to errors on some datasets). 
+I plan to make this line into an optional hyper-parameter, and then add a discussion to Troubleshooting to invoke this if there are numerical errors. 
+Also see the discussion in the pull requests from a contributor who found in his dataset that making this quantity bigger was sometimes helpful. 
+In the meantime, I want people to be aware of it, and consider commenting out the line if you are getting poor results or making it bigger if you are getting numerical errors.
+
 ## Example usage with command line interface
 
 These examples use data included in the tests folder. `python vis_corex.py -h` gives an overview of the options. 
