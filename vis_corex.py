@@ -199,7 +199,7 @@ def make_graph(weights, node_weights, column_label, max_edges=100):
 
 
 def trim(g, max_parents=False, max_children=False):
-    if float(nx.__version__) < 2:
+    if float(nx.__version__.split('.')[0]) < 2:  # float(nx.__version__) < 2:
         edgedict = g.edge
     else:
         edgedict = g.adj
